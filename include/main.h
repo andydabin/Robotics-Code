@@ -60,7 +60,11 @@ void operatorControl();
 
 #define GYRO_INPUT 7
 
-
 Encoder flyOSE;
+
+Encoder driveLeftOse;
+Encoder driveRightOse;
+
+Gyro gyro;
 
 #endif
