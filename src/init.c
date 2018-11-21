@@ -1,13 +1,9 @@
 #include "main.h"
 
-
-
 void initializeIO() {
 
 }
 
-Encoder driveLeftOse;
-Encoder driveRightOse;
 Gyro gyro;
 
 void initialize() {
