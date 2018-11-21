@@ -3,14 +3,8 @@
 
 #include "movement.h"
 
- void setDriveLeft( int speed );
- void setDriveRight( int speed );
- void setIntake( int speed );
- void setArm( int speed );
- void setFly( int speed );
- void driveStraight( int travelDistanceA, int travelDistanceD, int maxSpeed );
- void pointTurn();
-
+void driveStraight( int travelDistanceA, int travelDistanceD, int maxSpeed );
+void pointTurn();
 
 void autonomous() {
 }

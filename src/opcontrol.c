@@ -3,18 +3,10 @@
 
 #include "movement.h"
 
-void setDriveLeft( int speed );
-void setDriveRight( int speed );
-void setIntake( int speed );
-void setArm( int speed );
-void setFly( int speed );
-
 void taskDrive( void * parameter );
 void taskFly( void * parameter );
 void taskFlyRPM( void * parameter );
 void taskArm( void * parameter );
-
-double square( double input );
 
 int intakemode = 0; // 0 = not moving, 1 = IN, 2 = OUT
 bool intakeTogglePrev = false;
@@ -40,9 +32,9 @@ void taskDrive( void * parameter ) {
 
 		double factor = abs( joystickGetAnalog( JOY_MASTER, AXIS_LEFT_V ) ) / 127.0 ;
 
-		double left = joystickGetAnalog( JOY_MASTER, AXIS_LEFT_V ) + joystickGetAnalog( JOY_MASTER, AXIS_RIGHT_H ) * ( 0.3 + 0.6 * sqrt( factor ) );
+		double left = joystickGetAnalog( JOY_MASTER, AXIS_LEFT_V ) + joystickGetAnalog( JOY_MASTER, AXIS_RIGHT_H ) * ( 0.3 + 0.4 * sqrt( factor ) );
 
-		double right = joystickGetAnalog( JOY_MASTER, AXIS_LEFT_V ) - joystickGetAnalog( JOY_MASTER, AXIS_RIGHT_H ) * ( 0.3 + 0.6 * sqrt( factor ) );
+		double right = joystickGetAnalog( JOY_MASTER, AXIS_LEFT_V ) - joystickGetAnalog( JOY_MASTER, AXIS_RIGHT_H ) * ( 0.3 + 0.4 * sqrt( factor ) );
 
 		setDriveLeft( left );
 		setDriveRight( right );
@@ -112,6 +104,7 @@ void taskArm( void * parameter ) {
 
 	while ( true ) {
 
+		/*
 		if ( joystickGetDigital( JOY_MASTER, 8, JOY_LEFT ) ) {
 
 			setArm( 127 );
@@ -162,15 +155,24 @@ void taskArm( void * parameter ) {
 			}
 
 		}
+		*/
+
+		if ( joystickGetDigital( JOY_MASTER, 8, JOY_LEFT ) ) {
+
+			setArm( 80 );
+
+		} else if ( joystickGetDigital( JOY_MASTER, 8, JOY_DOWN ) ) {
+
+			setArm( -80 );
+
+		} else {
+
+			setArm( 0 );
+
+		}
 
 		delay( 20 );
 
 	}
-
-}
-
-double square( double input ) {
-
-	return input * input;
 
 }

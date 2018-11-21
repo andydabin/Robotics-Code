@@ -4,8 +4,6 @@ void initializeIO() {
 
 }
 
-Gyro gyro;
-
 void initialize() {
 
   flyOSE = encoderInit(OSE_FLYWHEEL_TOP, OSE_FLYWHEEL_BOTTOM, NOT_REVERSED);
