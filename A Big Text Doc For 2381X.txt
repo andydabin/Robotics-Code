@@ -1,2 +1,3 @@
 2126 Nov 11, 2018 - Anni Merged. Added Point Turn Function
 Nov 22, 2018 - Victor Merged i guess?. Added strucutre for 8 different autons. Point turn function still needs to be adjusted.
+Nov 22, 2018 - Victor Merged hopefully correctly.  added function driving until distance from wall (needs checking). added function for intaking and launching ball. filled in values and variables structure. values for pot still need to be entered.  point turn needs to be completed. 
