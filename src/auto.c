@@ -411,7 +411,52 @@ void driveStraight( int travelDistanceA, int travelDistanceD, int maxSpeed, int 
   }
 }
 
-void pointTurn( int turnType, int maxSpeed) {
+void PointTurn( int turnDir ) {
+  gyroReset(gyro);
+  int leftEncDelta;
+  int rightEncDelta;
+  int leftEncStart = encoderGet( driveLeftOse );
+  int rightEncStart = encoderGet( driveRightOse );
+  if ( turnDir == 0 ) { //turning CW
+    leftEncDelta = abs( leftEncStart - encoderGet( driveLeftOse ) );
+    rightEncDelta = abs( rightEncStart - encoderGet( driveRightOse ) );
+    while( gyroGet(gyro) < 925 ) {
+      if ( leftEncDelta < 130 ) {
+        setDriveLeft( 80 );
+      } else if ( leftEncDelta > 135 ) {
+        setDriveLeft( -30 );
+      } else {
+        setDriveLeft( 0 );
+      }
+      if ( rightEncDelta < 130 ) {
+        setDriveRight( -80 );
+      } else if ( rightEncDelta > 135 ) {
+        setDriveRight( 30 );
+      } else {
+        setDriveRight( 0 );
+      }
+    }
+  } else if ( turnDir == 1 ) { //turning CCW
+    while( gyroGet(gyro) > -925 ) {
+      if ( leftEncDelta < 130 ) {
+        setDriveLeft( -80 );
+      } else if ( leftEncDelta > 135 ) {
+        setDriveLeft( 30 );
+      } else {
+        setDriveLeft( 0 );
+      }
+      if ( rightEncDelta < 130 ) {
+        setDriveRight( 80 );
+      } else if ( rightEncDelta > 135 ) {
+        setDriveRight( -30 );
+      } else {
+        setDriveRight( 0 );
+      }
+    }
+  }
+}
+
+void advancedPointTurn( int turnType, int maxSpeed) {
 //turn type 1: 90 degree ccw, 2: 90 degree cw, 3: small ccw, 4: small cw.
   encoderReset( driveLeftOse );
   encoderReset( driveRightOse );
