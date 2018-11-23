@@ -8,182 +8,334 @@
  void setIntake( int speed );
  void setArm( int speed );
  void setFly( int speed );
- void driveStraight( int travelDistanceA, int travelDistanceD, int maxSpeed );
+ void driveDistFromWall(int distance, int maxSpeed);
+ void driveStraight( int travelDistanceA, int travelDistanceD, int maxSpeed, int direction );
  void pointTurn();
+ void launchBall();
+ void intakeBall();
 
 
 void autonomous() {
-  int posPotDiv[6] = {}; //pot 2 divisions
-  int pathPotDiv[6] = {}; // pot 1 divisions
+  int posPotDiv[6] = {}; //pot 2 divisions, front left, front right, back left, back right, none
+  int pathPotDiv[7] = {}; // pot 1 divisions, front auton 1, 2, 3, rear auton 1
+  int midDistUpperLim = 1736, midDistLowerLim = 1665, midDistAvg = 1702;
+  int highDistUpperLim = 3515, highDistLowerLim = 3441, highDistAvg = 3478;
+  int maxSpeed = 110;
+  int capDist = 1016;
+
+  int flySpeed = 0;
+
+  while(flySpeed < 110){ // spin up fly
+    flySpeed += 2;
+    setFly(flySpeed);
+  }
 
   if(analogRead(POT_AUTON_2) > posPotDiv[0] && analogRead(POT_AUTON_2) < posPotDiv[1]){ // front left
     if(analogRead(POT_AUTON_1) > pathPotDiv[0] && analogRead(POT_AUTON_1) < pathPotDiv[1]){ //(start robot facing flags) mid > low > ball > high > low
-      setFly(int speed);  //start spinning up flywheel
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //prepare for mid or high flag
-      wait(unsigned long time); //wait until flywheel is fully spunup?
-      setIntake(int speed); //launchball
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //hit lowflag
-      setFly(0); //stop flywheel
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //driveback
+      driveDistFromWall(midDistAvg, maxSpeed); //prepare for mid
+      delay(1000); //wait until flywheel is fully spunup?
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); //hit lowflag
+      driveStraight(-400, -500, -maxSpeed, -1); //driveback
       pointTurn(); //turn 90 degrees
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //backup against wall to square against wall?
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed);//drive toward ball
-      wait(); //wait until intake has properly intaked balled
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // drive back
+      //driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //backup against wall to square against wall?
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1);//drive toward ball
+      intakeBall();
+      driveStraight(-capDist*4/5, -capDist, -maxSpeed, -1); // drive back
       pointTurn();//face towards
-      setFly(int speed);
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // poisition self for high/midflag flag
-      wait(); //wait until fly fully spun up
-      setIntake(int speed);//launch ball
+      driveDistFromWall(highDistAvg, maxSpeed); // poisition self for high flag
+      launchBall();
+      setIntake(127);//launch ball
       pointTurn(); // turn toward center low flag
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // run into low flag
+      driveStraight(1500, 1800, maxSpeed, 1); // run into low flag
       setFly(0); //fly stop
-    } else if(analogRead(analogRead(POT_AUTON_1) > pathPotDiv[1] && analogRead(POT_AUTON_1) < pathPotDiv[2])){ // (start robot facing center) ball > high > mid > low
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[1] && analogRead(POT_AUTON_1) < pathPotDiv[2]){ // (start robot facing center) mid > low > ball > high > low
+      pointTurn(); // face flags
+      driveDistFromWall(midDistAvg, maxSpeed); //prepare for mid
+      delay(1000); //wait until flywheel is fully spunup?
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); //hit lowflag
+      driveStraight(-400, -500, -maxSpeed, -1); //driveback
+      pointTurn(); //turn 90 degrees
+      //driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //backup against wall to square against wall?
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1);//drive toward ball
+      intakeBall();
+      driveStraight(-capDist*4/5, -capDist, -maxSpeed, -1); // drive back
+      pointTurn();//face towards
+      driveDistFromWall(highDistAvg, maxSpeed); // poisition self for high flag
+      launchBall();
+      setIntake(127);//launch ball
+      pointTurn(); // turn toward center low flag
+      driveStraight(1500, 1800, maxSpeed, 1); // run into low flag
+      setFly(0); //fly stop
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[2] && analogRead(POT_AUTON_1) < pathPotDiv[3]){ // (start robot facing center)(center flags) ball > high > mid > low
       setIntake(30); //start intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed //drive forward towards ball
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1); //drive forward towards ball
+      intakeBall();
       //driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed)//drive back into position
-      setFly(int speed);
       pointTurn(); // faceflags
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //position for high flag
-      setIntake(127); // launchball
-      wait(unsigned long time);
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // position for mid flag
-      setIntake(127); // launchball
-      wait(unsigned long time);
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //low flag
-    } else if(analogRead(analogRead(POT_AUTON_1) > pathPotDiv[2] && analogRead(POT_AUTON_1) < pathPotDiv[3])){ //(start robot facing flags) ball > high > mid > low
+      driveDistFromWall(highDistAvg, maxSpeed); //position for high flag
+      launchBall();
+      driveDistFromWall(midDistAvg, maxSpeed);// position for mid flag
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); //low flag
+      setFly(0);
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[3] && analogRead(POT_AUTON_1) < pathPotDiv[4]){ //(start robot facing flags) (center flags) ball > high > mid > low
       pointTurn(); // turn and face center
       setIntake(30); //start intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed //drive forward towards ball
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1); //drive forward towards ball
+      intakeBall();
       //driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed)//drive back into position
-      setFly(int speed);
       pointTurn(); // faceflags
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //position for high flag
-      setIntake(127); // launchball
-      wait(unsigned long time);
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // position for mid flag
-      setIntake(127); // launchball
-      wait(unsigned long time);
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //low flag
-    } else if(analogRead(analogRead(POT_AUTON_1) > pathPotDiv[3] && analogRead(POT_AUTON_1) < pathPotDiv[4])){ // (start robot facing center) mid > low > ball > high > low
-      pointTurn(); // face flags
-      setFly(int speed);  //start spinning up flywheel
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //prepare for mid or high flag
-      wait(unsigned long time); //wait until flywheel is fully spunup?
-      setIntake(int speed); //launchball
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //hit lowflag
-      setFly(0); //stop flywheel
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //driveback
-      pointTurn(); //turn 90 degrees
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //backup against wall to square against wall?
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed);//drive toward ball
-      wait(); //wait until intake has properly intaked balled
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // drive back
-      pointTurn();//face towards
-      setFly(int speed);
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // poisition self for high/midflag flag
-      wait(); //wait until fly fully spun up
-      setIntake(int speed);//launch ball
-      pointTurn(); // turn toward center low flag
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // run into low flag
-      setFly(0); //fly stop
+      driveDistFromWall(highDistAvg, maxSpeed); //position for high flag
+      launchBall();
+      driveDistFromWall(midDistAvg, maxSpeed);// position for mid flag
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); //low flag
+      setFly(0);
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[4] && analogRead(POT_AUTON_1) < pathPotDiv[5]){ //(start robot facing center) (side flags) ball > high > mid > low
+      setIntake(30); //start intake
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1); //drive forward towards ball
+      intakeBall();
+      driveStraight(-capDist*4/5, -capDist, -maxSpeed, -1);//drive back into position
+      pointTurn(); // faceflags
+      driveDistFromWall(highDistAvg, maxSpeed);//get into position for high flag
+      launchBall();
+      driveDistFromWall(midDistAvg, maxSpeed); //get into position for mid
+      intakeBall();
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); // drive into low
+      setFly(0);
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[5] && analogRead(POT_AUTON_1) < pathPotDiv[6]){ //(start robot facing flags) (side flags) ball > high > mid > low
+      pointTurn();
+      setIntake(30); //start intake
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1); //drive forward towards ball
+      intakeBall();
+      driveStraight(-capDist*4/5, -capDist, -maxSpeed, -1);//drive back into position
+      pointTurn(); // faceflags
+      driveDistFromWall(highDistAvg, maxSpeed);//get into position for high flag
+      launchBall();
+      driveDistFromWall(midDistAvg, maxSpeed); //get into position for mid
+      intakeBall();
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); // drive into low
+      setFly(0);
     }
   } else if(analogRead(POT_AUTON_2) > posPotDiv[1] && analogRead(POT_AUTON_2) < posPotDiv[2]){//front right
     if(analogRead(POT_AUTON_1) > pathPotDiv[0] && analogRead(POT_AUTON_1) < pathPotDiv[1]){ //(start robot facing flags) mid > low > ball > high > low
-      setFly(int speed);  //start spinning up flywheel
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //prepare for mid or high flag
-      wait(unsigned long time); //wait until flywheel is fully spunup?
-      setIntake(int speed); //launchball
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //hit lowflag
-      setFly(0); //stop flywheel
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //driveback
+      driveDistFromWall(midDistAvg, maxSpeed); //prepare for mid
+      delay(1000); //wait until flywheel is fully spunup?
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); //hit lowflag
+      driveStraight(-400, -500, -maxSpeed, -1); //driveback
       pointTurn(); //turn 90 degrees
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //backup against wall to square against wall?
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed);//drive toward ball
-      wait(); //wait until intake has properly intaked balled
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // drive back
+      //driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //backup against wall to square against wall?
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1);//drive toward ball
+      intakeBall();
+      driveStraight(-capDist*4/5, -capDist, -maxSpeed, -1); // drive back
       pointTurn();//face towards
-      setFly(int speed);
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // poisition self for high/midflag flag
-      wait(); //wait until fly fully spun up
-      setIntake(int speed);//launch ball
+      driveDistFromWall(highDistAvg, maxSpeed); // poisition self for high flag
+      launchBall();
+      setIntake(127);//launch ball
       pointTurn(); // turn toward center low flag
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // run into low flag
+      driveStraight(1500, 1800, maxSpeed, 1); // run into low flag
       setFly(0); //fly stop
-    } else if(analogRead(analogRead(POT_AUTON_1) > [1] && analogRead(POT_AUTON_1) < [2])){ // (start robot facing center) ball > high > mid > low
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[1] && analogRead(POT_AUTON_1) < pathPotDiv[2]){ // (start robot facing center) mid > low > ball > high > low
+      pointTurn(); // face flags
+      driveDistFromWall(midDistAvg, maxSpeed); //prepare for mid
+      delay(1000); //wait until flywheel is fully spunup?
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); //hit lowflag
+      driveStraight(-400, -500, -maxSpeed, -1); //driveback
+      pointTurn(); //turn 90 degrees
+      //driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //backup against wall to square against wall?
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1);//drive toward ball
+      intakeBall();
+      driveStraight(-capDist*4/5, -capDist, -maxSpeed, -1); // drive back
+      pointTurn();//face towards
+      driveDistFromWall(highDistAvg, maxSpeed); // poisition self for high flag
+      launchBall();
+      setIntake(127);//launch ball
+      pointTurn(); // turn toward center low flag
+      driveStraight(1500, 1800, maxSpeed, 1); // run into low flag
+      setFly(0); //fly stop
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[2] && analogRead(POT_AUTON_1) < pathPotDiv[3]){ // (start robot facing center)(center flags) ball > high > mid > low
       setIntake(30); //start intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed //drive forward towards ball
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1); //drive forward towards ball
+      intakeBall();
       //driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed)//drive back into position
-      setFly(int speed);
       pointTurn(); // faceflags
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //position for high flag
-      setIntake(127); // launchball
-      wait(unsigned long time);
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // position for mid flag
-      setIntake(127); // launchball
-      wait(unsigned long time);
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //low flag
-    } else if(analogRead(analogRead(POT_AUTON_1) > pathPotDiv[2] && analogRead(POT_AUTON_1) < pathPotDiv[3])){ //(start robot facing flags) ball > high > mid > low
+      driveDistFromWall(highDistAvg, maxSpeed); //position for high flag
+      launchBall();
+      driveDistFromWall(midDistAvg, maxSpeed);// position for mid flag
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); //low flag
+      setFly(0);
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[3] && analogRead(POT_AUTON_1) < pathPotDiv[4]){ //(start robot facing flags) (center flags) ball > high > mid > low
       pointTurn(); // turn and face center
       setIntake(30); //start intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed //drive forward towards ball
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1); //drive forward towards ball
+      intakeBall();
       //driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed)//drive back into position
-      setFly(int speed);
       pointTurn(); // faceflags
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //position for high flag
-      setIntake(127); // launchball
-      wait(unsigned long time);
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // position for mid flag
-      setIntake(127); // launchball
-      wait(unsigned long time);
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //low flag
-    }else if(analogRead(analogRead(POT_AUTON_1) > pathPotDiv[3] && analogRead(POT_AUTON_1) < pathPotDiv[4])){ // (start robot facing center) mid > low > ball > high > low
-      pointTurn(); // face flags
-      setFly(int speed);  //start spinning up flywheel
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //prepare for mid or high flag
-      wait(unsigned long time); //wait until flywheel is fully spunup?
-      setIntake(int speed); //launchball
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //hit lowflag
-      setFly(0); //stop flywheel
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //driveback
-      pointTurn(); //turn 90 degrees
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); //backup against wall to square against wall?
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed);//drive toward ball
-      wait(); //wait until intake has properly intaked balled
-      setIntake(0); //stop intake
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // drive back
-      pointTurn();//face towards
-      setFly(int speed);
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // poisition self for high/midflag flag
-      wait(); //wait until fly fully spun up
-      setIntake(int speed);//launch ball
-      pointTurn(); // turn toward center low flag
-      driveStraight(int travelDistanceA, int travelDistanceD, int maxSpeed); // run into low flag
-      setFly(0); //fly stop
+      driveDistFromWall(highDistAvg, maxSpeed); //position for high flag
+      launchBall();
+      driveDistFromWall(midDistAvg, maxSpeed);// position for mid flag
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); //low flag
+      setFly(0);
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[4] && analogRead(POT_AUTON_1) < pathPotDiv[5]){ //(start robot facing center) (side flags) ball > high > mid > low
+      setIntake(30); //start intake
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1); //drive forward towards ball
+      intakeBall();
+      driveStraight(-capDist*4/5, -capDist, -maxSpeed, -1);//drive back into position
+      pointTurn(); // faceflags
+      driveDistFromWall(highDistAvg, maxSpeed);//get into position for high flag
+      launchBall();
+      driveDistFromWall(midDistAvg, maxSpeed); //get into position for mid
+      intakeBall();
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); // drive into low
+      setFly(0);
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[5] && analogRead(POT_AUTON_1) < pathPotDiv[6]){ //(start robot facing flags) (side flags) ball > high > mid > low
+      pointTurn();
+      setIntake(30); //start intake
+      driveStraight(capDist*4/5, capDist, maxSpeed, 1); //drive forward towards ball
+      intakeBall();
+      driveStraight(-capDist*4/5, -capDist, -maxSpeed, -1);//drive back into position
+      pointTurn(); // faceflags
+      driveDistFromWall(highDistAvg, maxSpeed);//get into position for high flag
+      launchBall();
+      driveDistFromWall(midDistAvg, maxSpeed); //get into position for mid
+      intakeBall();
+      launchBall();
+      driveStraight(400, 500, maxSpeed, 1); // drive into low
+      setFly(0);
     }
   } else if(analogRead(POT_AUTON_2) > posPotDiv[1] && analogRead(POT_AUTON_2) < posPotDiv[2]){ //back left
-
+    if(analogRead(POT_AUTON_1) > pathPotDiv[0] && analogRead(POT_AUTON_1) < pathPotDiv[1]){ //(face flags) high > low
+      driveDistFromWall(highDistAvg, maxSpeed); //drive forward to distance for high flag
+      launchBall();
+      driveStraight(700, 800, maxSpeed, 1);//hit low flag
+      setFly(0);
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[1] && analogRead(POT_AUTON_1) < pathPotDiv[2]){ //(face center) high > low
+      pointTurn();
+      driveDistFromWall(highDistAvg, maxSpeed); //drive forward to distance for high flag
+      launchBall();
+      driveStraight(700, 800, maxSpeed, 1);//hit low flag
+      setFly(0);
+    }
   } else if(analogRead(POT_AUTON_2) > posPotDiv[1] && analogRead(POT_AUTON_2) < posPotDiv[2]){ //back right
-
+    if(analogRead(POT_AUTON_1) > pathPotDiv[0] && analogRead(POT_AUTON_1) < pathPotDiv[1]){ //(face flags) high > low
+      driveDistFromWall(highDistAvg, maxSpeed); //drive forward to distance for high flag
+      launchBall();
+      driveStraight(700, 800, maxSpeed, 1);//hit low flag
+      setFly(0);
+    } else if(analogRead(POT_AUTON_1) > pathPotDiv[1] && analogRead(POT_AUTON_1) < pathPotDiv[2]){ //(face center) high > low
+      pointTurn();
+      driveDistFromWall(highDistAvg, maxSpeed); //drive forward to distance for high flag
+      launchBall();
+      driveStraight(700, 800, maxSpeed, 1);//hit low flag
+      setFly(0);
+    }
   } else{ // no auton lol
+
+  }
+}
+
+void launchBall(){
+  while(digitalRead(FLY_LIMIT) == LOW){
+    setIntake(127); //launchball
+  }
+  delay(500); // wait until ball fully launched, not sure if needed
+  setIntake(0);
+}
+
+void intakeBall(){
+  while(digitalRead(FLY_LIMIT) == HIGH){
+    setIntake(30); //intake bal;
+  }
+  setIntake(0);
+}
+
+void driveDistFromWall(int range, int maxSpeed){
+  int rangeA = (ultrasonicGet(sonar) - range)/5 + range;
+  int rangeD = range;
+
+  int target;
+  int deviation;
+  int deviationCompensation;
+
+  encoderReset( driveLeftOse );
+  encoderReset( driveRightOse );
+
+  while ( ultrasonicGet(sonar) > rangeA ) {
+    deviation = encoderGet( driveLeftOse ) - encoderGet( driveRightOse ); //so if it's a negative number it means it's turning to the left, positive = turn to right
+    target = target + 4 > maxSpeed ? maxSpeed : target + 4;
+    deviationCompensation = abs( deviation ) * 3;
+
+    if ( deviation > 0 ) { //itc turn to right
+      if ( target + deviationCompensation < maxSpeed ) {
+        setDriveLeft( target );
+        setDriveRight( target + deviationCompensation );
+      } else {
+        setDriveLeft( target - deviationCompensation );
+        setDriveRight( target );
+      }
+    } else if ( deviation < 0 ) {
+      if ( target + deviationCompensation < maxSpeed ) {
+        setDriveLeft( target + deviationCompensation );
+        setDriveRight( target );
+      } else {
+        setDriveRight( target );
+        setDriveLeft( target - deviationCompensation );
+      }
+    } else {
+      setDriveRight( target );
+      setDriveLeft( target );
+    }
+
+    delay(20);
 
   }
 
 
+  while ( ultrasonicGet(sonar) > rangeD ) {
+
+    int decelDistance = ultrasonicGet(sonar) - rangeD;
+    int rate = floor( decelDistance / 100 );
+
+    deviation = encoderGet( driveLeftOse ) - encoderGet( driveRightOse ); //so if it's a negative number it means it's turning to the left, positive = turn to right
+    target = target - rate > 30 ? target - rate : 30;
+    deviationCompensation = abs( deviation ) * 3;
+
+    if ( deviation > 0 ) { //robot turn to right
+      if ( target + deviationCompensation < maxSpeed ) {
+        setDriveLeft( target );
+        setDriveRight( target + deviationCompensation );
+      } else {
+        setDriveLeft( target - deviationCompensation );
+        setDriveRight( target );
+      }
+    } else if ( deviation < 0 ) { //robot turn to left
+      if ( target + deviationCompensation < maxSpeed ) {
+        setDriveLeft( target + deviationCompensation );
+        setDriveRight( target );
+      } else {
+        setDriveRight( target );
+        setDriveLeft( target - deviationCompensation );
+      }
+    } else {
+      setDriveRight( target );
+      setDriveLeft( target );
+    }
+
+    delay(20);
+  }
+
 }
 
-void driveStraight( int travelDistanceA, int travelDistanceD, int maxSpeed ){ //give travelDistance in OSE TICKS
+void driveStraight( int travelDistanceA, int travelDistanceD, int maxSpeed, int direction ){ //give travelDistance in OSE TICKS
   int totalProgress;
   int target;
   int deviation;
@@ -193,7 +345,7 @@ void driveStraight( int travelDistanceA, int travelDistanceD, int maxSpeed ){ //
   encoderReset( driveRightOse );
 
   while ( totalProgress < travelDistanceA ) {
-    deviation = encoderGet( driveLeftOse ) - encoderGet( driveRightOse ); //so if it's a negative number it means it's turning to the left, positive = turn to right
+    deviation = direction * (encoderGet( driveLeftOse ) - encoderGet( driveRightOse )); //so if it's a negative number it means it's turning to the left, positive = turn to right
     target = target + 4 > maxSpeed ? maxSpeed : target + 4;
     deviationCompensation = abs( deviation ) * 3;
 
@@ -225,10 +377,10 @@ void driveStraight( int travelDistanceA, int travelDistanceD, int maxSpeed ){ //
 
   while ( totalProgress < travelDistanceD ) {
 
-    int decelDistance = travelDistanceD - travelDistanceD;
+    int decelDistance = totalProgress - travelDistanceD;
     int rate = floor( decelDistance / 100 );
 
-    deviation = encoderGet( driveLeftOse ) - encoderGet( driveRightOse ); //so if it's a negative number it means it's turning to the left, positive = turn to right
+    deviation = direction*(encoderGet( driveLeftOse ) - encoderGet( driveRightOse )); //so if it's a negative number it means it's turning to the left, positive = turn to right
     target = target - rate > 30 ? target - rate : 30;
     deviationCompensation = abs( deviation ) * 3;
 
