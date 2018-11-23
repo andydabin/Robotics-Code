@@ -58,7 +58,9 @@ void operatorControl();
 #define POT_AUTON_1 1
 #define POT_AUTON_2 2
 
-#define GYRO_INPUT 7
+#define FLY_LIMIT 7
+
+#define GYRO_INPUT 6
 
 Encoder flyOSE;
 
@@ -66,5 +68,7 @@ Encoder driveLeftOse;
 Encoder driveRightOse;
 
 Gyro gyro;
+
+Ultrasonic sonar;
 
 #endif
