@@ -61,7 +61,7 @@ void taskFly( void * parameter ) {
 		}
 
 		if ( joystickGetDigital( JOY_MASTER, 6, JOY_UP) ) {
-			flyspeed = flyspeed + 2 > 127 ? 127 : flyspeed + 2;
+			flyspeed = flyspeed + 2 > 110 ? 110 : flyspeed + 2;
 		} else {
 			flyspeed = flyspeed - 1 < 0 ? 0 : flyspeed - 1;
 		}
